@@ -1,0 +1,39 @@
+#!/bin/sh
+LOCALTIME=`date +%Y%m%d`
+mirrorlist_new=/etc/pacman.d/mirrorlist-$LOCALTIME
+mirrorlist=/etc/pacman.d/mirrorlist
+
+###
+# Main
+###
+if [[ $HOME != /root ]]; then
+	echo "You need root permission for run this script!"
+	exit 1
+fi
+[[ -e mirrorlist_new ]] && rm -rf $mirrorlist_new
+[[ -e $mirrorlist ]] && rm -rf $mirrorlist
+printf "Downloading mirrorlist"
+while true; do
+	echo -ne .
+	sleep 1
+done &
+curl -o  $mirrorlist_new https://www.archlinux.org/mirrorlist/all/ &>/dev/null  
+kill $!; trap '$!' SIGTERM
+printf "         Done!\n"
+sed -i "s/^#Server/Server/" $mirrorlist_new
+printf "Do you want use rankmirrors to  test the mirrors?[Y/n]: "
+read reponse 
+if [[ $reponse == 'y' ]]||[[ $reponse == "\n" ]]; then
+	printf "Insert num of mirrors that will be use"
+	read n
+	rankmirrors -n $n $mirrorlist_new > $mirrorlist
+else
+	mv $mirrorlist_new $mirrorlist
+fi
+sudo pacman -Syy
+if [[ $? == 0 ]]; then
+    echo "Finish!"
+else
+	echo "Ops, pacman can't refresh mirrors..."
+	echo "something went wrog :("
+fi
