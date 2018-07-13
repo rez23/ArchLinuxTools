@@ -24,7 +24,7 @@ sed -i "s/^#Server/Server/" $mirrorlist_new
 printf "Do you want use rankmirrors to  test the mirrors?[Y/n]: "
 read reponse 
 if [[ $reponse == 'y' ]]||[[ $reponse == "\n" ]]; then
-	printf "Insert num of mirrors that will be use"
+	printf "Insert num of mirrors that will be use: "
 	read n
 	rankmirrors -n $n $mirrorlist_new > $mirrorlist
 else
